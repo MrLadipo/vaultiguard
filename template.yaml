@@ -1,0 +1,94 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: This CFN Template launches an EC2 instance, an autoscaling group and attaches an Instance Profile Role for SSM. Created by B8U8.v28Sep2023T2034
+
+Parameters:
+  
+  InstanceAmiId:
+    Type: String
+    Description: The AMI ID to use in launching the EC2 instance.
+    Default: "ami-03a6eaae9938c858c"
+    
+  SubnetId:
+    Type: 'AWS::EC2::Subnet::Id'
+    Description: The Subnet to launch the EC2 instance into. Also implies the VPC (Default is public-subnet-us-east-1a-c5-default-vpc subnet-035a487bcac05edda).
+    Default: "subnet-035a487bcac05edda"
+
+  SecurityGroupId:
+    Type: String
+    Description: The ID of the security group to associate with the EC2 instance (Default is Cil-Academy-CodeDeploy-SG | sg-040c801b15aca5e36).
+    Default: sg-040c801b15aca5e36
+    
+  Region:
+    Type: String
+    Description: The region to deploy the EC2 instance in.
+    Default: us-east-1
+   
+  InstanceProfileArn:
+    Type: String
+    Description: The ARN of the Instance Profile to attach to the EC2 instance.
+    Default: "cil-academy-ec2-ssm-role"
+  
+  CodeDeployTag:
+    Type: String
+    Description: The tag to attach to the EC2 instance to enable targeting by CodeDeploy Agent.
+    Default: ""
+
+Conditions:
+    CodeDeployTagParamterIsAvailable: !Not [!Equals [!Ref CodeDeployTag, ""]]
+
+
+Resources: 
+  LaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: !Sub ${AWS::StackName}-launch-template
+      LaunchTemplateData:
+        ImageId: !Ref InstanceAmiId
+        InstanceType: t2.micro
+      
+        SubnetId: !Ref SubnetId
+
+        SecurityGroupIds: !Ref SecurityGroupId
+        IamInstanceProfile: !Ref InstanceProfileArn
+
+        UserData:
+          Fn::Base64: !Sub |
+            #!/bin/bash
+            echo "[B3C3 INFO] ###Beginning of B3C3 User Data Script"
+            echo "[B3C3 INFO] Installing Java on the Instance"
+            dnf install -y java
+            echo "[B3C3 INFO] Installing ruby and wget"
+            dnf install -y ruby wget
+            echo "[B3C3 INFO] Using wget to download Code Deploy Agent Install Script"
+            wget -O /tmp/cdagent_install https://aws-codedeploy-us-east-1.s3.us-east-1.amazonaws.com/latest/install
+            echo "[B3C3 INFO] Making the Code Deploy Agent Install Script Executable"
+            chmod +x /tmp/cdagent_install
+            echo "[B3C3 INFO] Installing and Starting the Amazon Code Deploy Agent using the Install Script"
+            /tmp/cdagent_install auto
+            echo "[B3C3 INFO] Checking the status of Code Deploy Agent via systemctl"
+            systemctl status codedeploy-agent
+            echo "[B3C3 INFO] End of B3C3 User Data Script###"
+  AutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+      Properties:
+        LaunchTemplate:
+          LaunchTemplateId: !Ref LaunchTemplate
+          Version: !GetAtt LaunchTemplate.LatestVersionNumber
+        MaxSize: '1'
+        MinSize: '1'
+        DesiredCapacity: '1'
+        VPCZoneIdentifier:
+
+
+      # Tags:
+      #     - Key: "CodeDeployTag"
+      #       Value: !If [CodeDeployTagParamterIsAvailable, !Ref CodeDeployTag, !Ref AWS::StackName]
+
+# Outputs:
+#   EC2InstanceId:
+#     Value: !Ref EC2Instance
+
+#   EC2CodeDeployTag:
+#     Value: !If [CodeDeployTagParamterIsAvailable, !Ref CodeDeployTag, !Ref AWS::StackName]
+
+#End of CFN Template
