@@ -70,14 +70,14 @@ Resources:
             echo "[B3C3 INFO] End of B3C3 User Data Script###"
   AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
-      Properties:
-        LaunchTemplate:
-          LaunchTemplateId: !Ref LaunchTemplate
-          Version: !GetAtt LaunchTemplate.LatestVersionNumber
-        MaxSize: '1'
-        MinSize: '1'
-        DesiredCapacity: '1'
-        VPCZoneIdentifier:
+    Properties:
+      LaunchTemplate:
+        LaunchTemplateId: !Ref LaunchTemplate
+        Version: !GetAtt LaunchTemplate.LatestVersionNumber
+      MaxSize: '1'
+      MinSize: '1'
+      DesiredCapacity: '1'
+        # VPCZoneIdentifier:
 
 
       # Tags:
