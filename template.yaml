@@ -7,11 +7,17 @@ Parameters:
     Type: String
     Description: The AMI ID to use in launching the EC2 instance.
     Default: "ami-03a6eaae9938c858c"
+  
+  VPC:
+    Type: 'String'
+    Description: A virtual private cloud
+    Default: "vpc-00f9c4d2d7ac05ec4"
+
     
-  SubnetId:
-    Type: 'AWS::EC2::Subnet::Id'
-    Description: The Subnet to launch the EC2 instance into. Also implies the VPC (It is deployed into private subnet(s)).
-    Default: "subnet-0c16ce81d84e81084"
+  Subnets:
+    Type: 'List<AWS::EC2::Subnet::Id>'
+    Description: The Subnets to launch the EC2 instance into. Also implies the VPC (It is deployed into private subnet(s)).
+    # Default: "subnet-0c16ce81d84e81084"
 
   # SecurityGroupId:
   #   Type: String
@@ -42,34 +48,33 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       HealthCheckIntervalSeconds: 30
-      HealthCheckProtocol: HTTP
+      HealthCheckProtocol: HTTPS
       HealthCheckTimeoutSeconds: 15
       HealthyThresholdCount: 5
       Matcher:
-        HttpCode: '200'
+        HttpsCode: '200'
       Name: EC2TargetGroup
-      Port: 80
-      Protocol: HTTP
+      Port: 443
+      Protocol: HTTPS
       TargetGroupAttributes:
       - Key: deregistration_delay.timeout_seconds
         Value: '20'
       UnhealthyThresholdCount: 3
-      SubnetId: !Ref SubnetId
-  ELBListener:
+      VpcId: !Ref VPC
+  ALBListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
       DefaultActions:
         - Type: forward
           TargetGroupArn: !Ref EC2TargetGroup
       LoadBalancerArn: !Ref ApplicationLoadBalancer
-      Port: 80
-      Protocol: HTTP
+      Port: 443
+      Protocol: HTTPS
   ApplicationLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       Scheme: internet-facing
-      SubnetId: !Ref SubnetId
-
+      Subnets: !Ref Subnets
 
   LaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
@@ -79,7 +84,7 @@ Resources:
         ImageId: !Ref InstanceAmiId
         InstanceType: t2.micro
       
-        SubnetId: !Ref SubnetId
+        # Subnets: !Ref Subnets
 
         # SecurityGroupIds: !Ref SecurityGroupId
         # IamInstanceProfile: !Ref InstanceProfileArn
@@ -101,6 +106,7 @@ Resources:
             echo "[B3C3 INFO] Checking the status of Code Deploy Agent via systemctl"
             systemctl status codedeploy-agent
             echo "[B3C3 INFO] End of B3C3 User Data Script###"
+ 
   AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
@@ -110,8 +116,9 @@ Resources:
       MaxSize: '5'
       MinSize: '2'
       DesiredCapacity: '2'
-      TargetGroupARNs: !Ref EC2TargetGroup
-      VPCZoneIdentifier: !Ref SubnetId
+      TargetGroupARNs: 
+        - !Ref EC2TargetGroup
+      VPCZoneIdentifier: !Ref Subnets
 
 
       # Tags:
