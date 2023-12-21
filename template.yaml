@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: This CFN Template launches an EC2 instance, an autoscaling group and attaches an Instance Profile Role for SSM. Created by B8U8.v28Sep2023T2034
+Description: This CFN Template launches an EC2 instance, an autoscaling group,an application load balancer and attaches an Instance Profile Role for SSM. Created by B8U8.v28Sep2023T2034
 
 Parameters:
   
@@ -10,34 +10,67 @@ Parameters:
     
   SubnetId:
     Type: 'AWS::EC2::Subnet::Id'
-    Description: The Subnet to launch the EC2 instance into. Also implies the VPC (Default is public-subnet-us-east-1a-c5-default-vpc subnet-035a487bcac05edda).
-    Default: "subnet-035a487bcac05edda"
+    Description: The Subnet to launch the EC2 instance into. Also implies the VPC (It is deployed into private subnet(s)).
+    Default: "subnet-0c16ce81d84e81084"
 
-  SecurityGroupId:
-    Type: String
-    Description: The ID of the security group to associate with the EC2 instance (Default is Cil-Academy-CodeDeploy-SG | sg-040c801b15aca5e36).
-    Default: sg-040c801b15aca5e36
+  # SecurityGroupId:
+  #   Type: String
+  #   Description: The ID of the security group to associate with the EC2 instance (Default is Cil-Academy-CodeDeploy-SG | sg-040c801b15aca5e36).
+  #   Default: sg-040c801b15aca5e36
     
   Region:
     Type: String
     Description: The region to deploy the EC2 instance in.
     Default: us-east-1
    
-  InstanceProfileArn:
-    Type: String
-    Description: The ARN of the Instance Profile to attach to the EC2 instance.
-    Default: "cil-academy-ec2-ssm-role"
+  # InstanceProfileArn:
+  #   Type: String
+  #   Description: The ARN of the Instance Profile to attach to the EC2 instance.
+  #   Default: "cil-academy-ec2-ssm-role"
   
-  CodeDeployTag:
-    Type: String
-    Description: The tag to attach to the EC2 instance to enable targeting by CodeDeploy Agent.
-    Default: ""
+  # CodeDeployTag:
+  #   Type: String
+  #   Description: The tag to attach to the EC2 instance to enable targeting by CodeDeploy Agent.
+  #   Default: ""
 
-Conditions:
-    CodeDeployTagParamterIsAvailable: !Not [!Equals [!Ref CodeDeployTag, ""]]
+# Conditions:
+#     CodeDeployTagParamterIsAvailable: !Not [!Equals [!Ref CodeDeployTag, ""]]
 
 
 Resources: 
+  EC2TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 30
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 15
+      HealthyThresholdCount: 5
+      Matcher:
+        HttpCode: '200'
+      Name: EC2TargetGroup
+      Port: 80
+      Protocol: HTTP
+      TargetGroupAttributes:
+      - Key: deregistration_delay.timeout_seconds
+        Value: '20'
+      UnhealthyThresholdCount: 3
+      SubnetId: !Ref SubnetId
+  ELBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref EC2TargetGroup
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      Port: 80
+      Protocol: HTTP
+  ApplicationLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Scheme: internet-facing
+      SubnetId: !Ref SubnetId
+
+
   LaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Properties:
@@ -48,8 +81,8 @@ Resources:
       
         SubnetId: !Ref SubnetId
 
-        SecurityGroupIds: !Ref SecurityGroupId
-        IamInstanceProfile: !Ref InstanceProfileArn
+        # SecurityGroupIds: !Ref SecurityGroupId
+        # IamInstanceProfile: !Ref InstanceProfileArn
 
         UserData:
           Fn::Base64: !Sub |
@@ -74,10 +107,11 @@ Resources:
       LaunchTemplate:
         LaunchTemplateId: !Ref LaunchTemplate
         Version: !GetAtt LaunchTemplate.LatestVersionNumber
-      MaxSize: '1'
-      MinSize: '1'
-      DesiredCapacity: '1'
-        # VPCZoneIdentifier:
+      MaxSize: '5'
+      MinSize: '2'
+      DesiredCapacity: '2'
+      TargetGroupARNs: !Ref EC2TargetGroup
+      VPCZoneIdentifier: !Ref SubnetId
 
 
       # Tags:
