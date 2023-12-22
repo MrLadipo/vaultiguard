@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: This CFN Template launches an EC2 instance, an autoscaling group,an application load balancer and attaches an Instance Profile Role for SSM. Created by B8U8.v28Sep2023T2034
+Description: This CFN Template launches an EC2 instance, an autoscaling group,and an application load balancer. Created by Group 4
 
 Parameters:
   
@@ -9,30 +9,23 @@ Parameters:
     Default: "ami-03a6eaae9938c858c"
   
   VPC:
-    Type: 'String'
+    Type: String
     Description: A virtual private cloud
     Default: "vpc-00f9c4d2d7ac05ec4"
-
-    
-  Subnets:
+   
+  PrivateSubnets:
     Type: 'List<AWS::EC2::Subnet::Id>'
     Description: The Subnets to launch the EC2 instance into. Also implies the VPC (It is deployed into private subnet(s)).
-    # Default: "subnet-0c16ce81d84e81084"
 
-  # SecurityGroupId:
-  #   Type: String
-  #   Description: The ID of the security group to associate with the EC2 instance (Default is Cil-Academy-CodeDeploy-SG | sg-040c801b15aca5e36).
-  #   Default: sg-040c801b15aca5e36
+  PublicSubnets:
+    Type: 'List<AWS::EC2::Subnet::Id>'
+    Description: The Subnets to launch the Load Balancer instance into. Also implies the VPC (It is deployed into public subnet(s)).
     
   Region:
     Type: String
     Description: The region to deploy the EC2 instance in.
     Default: us-east-1
    
-  # InstanceProfileArn:
-  #   Type: String
-  #   Description: The ARN of the Instance Profile to attach to the EC2 instance.
-  #   Default: "cil-academy-ec2-ssm-role"
   
   # CodeDeployTag:
   #   Type: String
@@ -44,6 +37,32 @@ Parameters:
 
 
 Resources: 
+  ELBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ELB Security Group
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 0.0.0.0/0
+
+  EC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: EC2 Security Group
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        SourceSecurityGroupId:
+          Fn::GetAtt:
+          - ELBSecurityGroup
+          - GroupId
+
+
   EC2TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
@@ -52,7 +71,7 @@ Resources:
       HealthCheckTimeoutSeconds: 15
       HealthyThresholdCount: 5
       Matcher:
-        HttpsCode: '200'
+        HttpCode: '200'
       Name: EC2TargetGroup
       Port: 443
       Protocol: HTTPS
@@ -61,7 +80,8 @@ Resources:
         Value: '20'
       UnhealthyThresholdCount: 3
       VpcId: !Ref VPC
-  ALBListener:
+
+  ELBListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
       DefaultActions:
@@ -70,11 +90,24 @@ Resources:
       LoadBalancerArn: !Ref ApplicationLoadBalancer
       Port: 443
       Protocol: HTTPS
+
   ApplicationLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       Scheme: internet-facing
-      Subnets: !Ref Subnets
+      Subnets: !Ref PublicSubnets
+
+  MyIPSetDenylist: 
+    Type: AWS::WAF::IPSet
+    Properties: 
+      Name: IPSet to deny listed IP addresses
+      IPSetDescriptors: 
+        - 
+          Type: IPV4
+          Value: 192.0.2.44/32
+        - 
+          Type: IPV4
+          Value: 192.0.7.0/24
 
   LaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
@@ -83,11 +116,6 @@ Resources:
       LaunchTemplateData:
         ImageId: !Ref InstanceAmiId
         InstanceType: t2.micro
-      
-        # Subnets: !Ref Subnets
-
-        # SecurityGroupIds: !Ref SecurityGroupId
-        # IamInstanceProfile: !Ref InstanceProfileArn
 
         UserData:
           Fn::Base64: !Sub |
@@ -118,12 +146,7 @@ Resources:
       DesiredCapacity: '2'
       TargetGroupARNs: 
         - !Ref EC2TargetGroup
-      VPCZoneIdentifier: !Ref Subnets
-
-
-      # Tags:
-      #     - Key: "CodeDeployTag"
-      #       Value: !If [CodeDeployTagParamterIsAvailable, !Ref CodeDeployTag, !Ref AWS::StackName]
+      VPCZoneIdentifier: !Ref PrivateSubnets
 
 # Outputs:
 #   EC2InstanceId:
@@ -132,4 +155,4 @@ Resources:
 #   EC2CodeDeployTag:
 #     Value: !If [CodeDeployTagParamterIsAvailable, !Ref CodeDeployTag, !Ref AWS::StackName]
 
-#End of CFN Template
+# End of CFN Template
