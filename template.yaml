@@ -25,22 +25,13 @@ Parameters:
     Type: String
     Description: The region to deploy the EC2 instance in.
     Default: us-east-1
-   
-  
-  # CodeDeployTag:
-  #   Type: String
-  #   Description: The tag to attach to the EC2 instance to enable targeting by CodeDeploy Agent.
-  #   Default: ""
-
-# Conditions:
-#     CodeDeployTagParamterIsAvailable: !Not [!Equals [!Ref CodeDeployTag, ""]]
 
 
 Resources: 
   ELBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: ELB Security Group
+      GroupDescription: ELB Security Group for group 4
       VpcId: !Ref VPC
       SecurityGroupIngress:
       - IpProtocol: tcp
@@ -51,7 +42,7 @@ Resources:
   EC2SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: EC2 Security Group
+      GroupDescription: EC2 Security Group for group 4
       VpcId: !Ref VPC
       SecurityGroupIngress:
       - IpProtocol: tcp
@@ -72,7 +63,7 @@ Resources:
       HealthyThresholdCount: 5
       Matcher:
         HttpCode: '200'
-      Name: EC2TargetGroup
+      Name: Group4EC2TargetGroup
       Port: 443
       Protocol: HTTPS
       TargetGroupAttributes:
@@ -90,24 +81,54 @@ Resources:
       LoadBalancerArn: !Ref ApplicationLoadBalancer
       Port: 443
       Protocol: HTTPS
+      Certificates:
+        - CertificateArn: arn:aws:acm:us-east-1:920119599456:certificate/12bc1f4c-7b94-48b8-867f-f4310f91c845
 
   ApplicationLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
+      Name: !Sub ${AWS::StackName}-load-balancer
       Scheme: internet-facing
       Subnets: !Ref PublicSubnets
 
-  MyIPSetDenylist: 
-    Type: AWS::WAF::IPSet
-    Properties: 
-      Name: IPSet to deny listed IP addresses
-      IPSetDescriptors: 
-        - 
-          Type: IPV4
-          Value: 192.0.2.44/32
-        - 
-          Type: IPV4
-          Value: 192.0.7.0/24
+  # MyIPSetDenylist: 
+  #   Type: AWS::WAF::IPSet
+  #   Properties: 
+  #     Name: IPSet to deny listed IP addresses
+  #     IPSetDescriptors: 
+  #       - 
+  #         Type: IPV4
+  #         Value: 192.0.2.44/32
+  #       - 
+  #         Type: IPV4
+  #         Value: 192.0.7.0/24
+
+  # MyIPSetRule: 
+  #   Type: AWS::WAF::Rule
+  #   Properties: 
+  #     Name: MyIPSetRule
+  #     MetricName: MyIPSetRule
+  #     Predicates: 
+  #       - 
+  #         DataId: 
+  #           Ref: MyIPSetDenylist
+  #         Negated: false
+  #         Type: IPMatch
+  
+  # MyWebACL: 
+  #   Type: AWS::WAF::WebACL
+  #   Properties: 
+  #     Name: WebACL to block IP addresses
+  #     DefaultAction: 
+  #       Type: ALLOW
+  #     MetricName: MyWebACL
+  #     Rules: 
+  #       - 
+  #         Action: 
+  #           Type: BLOCK
+  #         Priority: 1
+  #         RuleId: 
+  #           Ref: MyIPSetRule
 
   LaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
@@ -116,6 +137,13 @@ Resources:
       LaunchTemplateData:
         ImageId: !Ref InstanceAmiId
         InstanceType: t2.micro
+        SecurityGroupIds: 
+        - !Ref EC2SecurityGroup
+        TagSpecifications:
+        - ResourceType: instance
+          Tags: 
+          - Key: Name
+            Value: Group4-instance
 
         UserData:
           Fn::Base64: !Sub |
@@ -147,12 +175,5 @@ Resources:
       TargetGroupARNs: 
         - !Ref EC2TargetGroup
       VPCZoneIdentifier: !Ref PrivateSubnets
-
-# Outputs:
-#   EC2InstanceId:
-#     Value: !Ref EC2Instance
-
-#   EC2CodeDeployTag:
-#     Value: !If [CodeDeployTagParamterIsAvailable, !Ref CodeDeployTag, !Ref AWS::StackName]
 
 # End of CFN Template
