@@ -162,6 +162,7 @@ Resources:
             echo "[B3C3 INFO] Checking the status of Code Deploy Agent via systemctl"
             systemctl status codedeploy-agent
             echo "[B3C3 INFO] End of B3C3 User Data Script###"
+            yum install -y httpd systemctl start httpd systemctl enable httpd echo "<h1>Hello World!</h1>" > /var/www/html/index.html
  
   AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
