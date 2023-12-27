@@ -37,26 +37,6 @@ Resources:
             Action: 's3:GetObject'
             Resource: !Join ['', ["arn:aws:s3:::", !Ref WebsiteBucket, "/*"]]
 
-  Repository:   
-    Type: "AWS::CodeCommit::Repository"
-    DependsOn: SNSRepoTrigger
-    Properties:
-      RepositoryName: !Sub ${ProjectName}-Repo
-      Triggers:
-      - Name: MasterTrigger
-        CustomData: !Ref "AWS::StackName"
-        DestinationArn: !Ref SNSRepoTrigger
-        Branches:
-        - main
-        Events:
-        - all
-
-  SNSRepoTrigger:
-    Type: "AWS::SNS::Topic"
-    Properties:
-      DisplayName: !Ref ProjectName
-      TopicName: !Ref ProjectName
-
   PipelineRole:  
     Type: AWS::IAM::Role  
     Properties:  
@@ -160,7 +140,7 @@ Resources:
       Artifacts:  
         Type: CODEPIPELINE  
       Environment:  
-        ComputeType: BUILD_GENERAL1_LARGE 
+        ComputeType: BUILD_GENERAL1_SMALL 
         Image: aws/codebuild/standard:5.0
         Type: LINUX_CONTAINER
         EnvironmentVariables:  
@@ -192,12 +172,12 @@ Resources:
               OutputArtifacts:  
                 - Name: CodeWorkspace  
               Configuration:  
-                RepositoryName: !Sub ${ProjectName}-Repo
+                RepositoryName: Group4_Repo
                 BranchName: main  
                 PollForSourceChanges: "true"
-        - Name: DEVELOP
+        - Name: DevelopAndDeploy
           Actions:  
-            - Name: deploy-to-s3 
+            - Name: Deploy-to-EC2 
               RunOrder: 5
               ActionTypeId:  
                 Category: Build  
