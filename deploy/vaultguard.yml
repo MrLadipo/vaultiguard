@@ -3,8 +3,13 @@ Description: This CFN Template launches CI-CD pipeline that includes code commit
 
 Parameters: 
   ProjectName:  
-    Description: vaultguard # verify the project name with group
+    Description: what's the name of your project? # verify the project name with group
     Type: String
+  
+  CodeCommitRepo:
+    Description: Specify the repo you want to use as source
+    Type: String
+    Default: Group4_Repo
 
 Resources:
   ArtifactBucket:
