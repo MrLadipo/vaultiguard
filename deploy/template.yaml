@@ -139,6 +139,24 @@ Resources:
   #         RuleId: 
   #           Ref: MyIPSetRule
 
+
+  SubdomainRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: Z00974392C6FM2O8GYXD3
+      Name: gtcfour.tspace.uk
+      Type: A
+      AliasTarget:
+        DNSName: 
+          Fn::GetAtt:
+          - ApplicationLoadBalancer
+          - DNSName
+        EvaluateTargetHealth: true
+        HostedZoneId:
+          Fn::GetAtt:
+          - ApplicationLoadBalancer
+          - CanonicalHostedZoneID
+
   LaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Properties:
