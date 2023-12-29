@@ -38,7 +38,12 @@ Resources:
         FromPort: 443
         ToPort: 443
         CidrIp: 0.0.0.0/0
-
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+        
   EC2SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -46,26 +51,27 @@ Resources:
       VpcId: !Ref VPC
       SecurityGroupIngress:
       - IpProtocol: tcp
-        FromPort: 443
-        ToPort: 443
+        FromPort: 80
+        ToPort: 80
         SourceSecurityGroupId:
           Fn::GetAtt:
           - ELBSecurityGroup
           - GroupId
+       
 
 
   EC2TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       HealthCheckIntervalSeconds: 30
-      HealthCheckProtocol: HTTPS
+      HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 15
       HealthyThresholdCount: 5
       Matcher:
         HttpCode: '200'
       Name: Group4EC2TargetGroup
-      Port: 443
-      Protocol: HTTPS
+      Port: 80
+      Protocol: HTTP
       TargetGroupAttributes:
       - Key: deregistration_delay.timeout_seconds
         Value: '20'
@@ -84,12 +90,15 @@ Resources:
       Certificates:
         - CertificateArn: arn:aws:acm:us-east-1:920119599456:certificate/12bc1f4c-7b94-48b8-867f-f4310f91c845
 
+
   ApplicationLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       Name: !Sub ${AWS::StackName}-load-balancer
       Scheme: internet-facing
       Subnets: !Ref PublicSubnets
+      SecurityGroups:
+        - !GetAtt ELBSecurityGroup.GroupId
 
   # MyIPSetDenylist: 
   #   Type: AWS::WAF::IPSet
@@ -149,6 +158,7 @@ Resources:
           Fn::Base64: !Sub |
             #!/bin/bash
             echo "[B3C3 INFO] ###Beginning of B3C3 User Data Script"
+            echo "[B3C3 INFO] Installing Web Server"
             yum install -y httpd 
             systemctl start httpd 
             systemctl enable httpd 
