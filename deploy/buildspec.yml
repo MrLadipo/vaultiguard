@@ -1,0 +1,10 @@
+version: 0.2
+phases:
+  pre_build:
+    commands:
+      - echo "This is a simple buildspec file"
+ 
+  build:
+    commands:
+      - echo $WEBSITE_BUCKET_NAME
+      - aws s3 cp index.html s3://$WEBSITE_BUCKET_NAME/
