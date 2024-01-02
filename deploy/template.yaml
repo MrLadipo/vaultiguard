@@ -25,6 +25,11 @@ Parameters:
     Type: String
     Description: The region to deploy the EC2 instance in.
     Default: us-east-1
+  
+  InstanceProfileArn:
+    Type: String
+    Description: The ARN of the Instance Profile to attach to the EC2 instance.
+    Default: "cil-academy-ec2-ssm-role"
 
 
 Resources: 
@@ -166,11 +171,13 @@ Resources:
         InstanceType: t2.micro
         SecurityGroupIds: 
         - !Ref EC2SecurityGroup
+        IamInstanceProfile: 
+          Name: !Ref InstanceProfileArn
         TagSpecifications:
         - ResourceType: instance
           Tags: 
           - Key: Name
-            Value: Group4-instance
+            Value: Group4-Server
 
         UserData:
           Fn::Base64: !Sub |
