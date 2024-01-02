@@ -100,51 +100,51 @@ Resources:
       SecurityGroups:
         - !GetAtt ELBSecurityGroup.GroupId
 
-  # MyIPSetDenylist: 
-  #   Type: AWS::WAF::IPSet
-  #   Properties: 
-  #     Name: IPSet to deny listed IP addresses
-  #     IPSetDescriptors: 
-  #       - 
-  #         Type: IPV4
-  #         Value: 192.0.2.44/32
-  #       - 
-  #         Type: IPV4
-  #         Value: 192.0.7.0/24
-
-  # MyIPSetRule: 
-  #   Type: AWS::WAF::Rule
-  #   Properties: 
-  #     Name: MyIPSetRule
-  #     MetricName: MyIPSetRule
-  #     Predicates: 
-  #       - 
-  #         DataId: 
-  #           Ref: MyIPSetDenylist
-  #         Negated: false
-  #         Type: IPMatch
+  IPSetDenyList:
+    Type: AWS::WAFv2::IPSet
+    Properties:
+      Description: IP addresses to Deny access
+      Name: WebACLIPSet
+      Scope: REGIONAL
+      IPAddressVersion: IPV4
+      Addresses:
+        - 192.0.2.44/32
   
-  # MyWebACL: 
-  #   Type: AWS::WAF::WebACL
-  #   Properties: 
-  #     Name: WebACL to block IP addresses
-  #     DefaultAction: 
-  #       Type: ALLOW
-  #     MetricName: MyWebACL
-  #     Rules: 
-  #       - 
-  #         Action: 
-  #           Type: BLOCK
-  #         Priority: 1
-  #         RuleId: 
-  #           Ref: MyIPSetRule
-
+  WebACL:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: IPRestrictions
+      Scope: REGIONAL
+      DefaultAction:
+        Allow: {}
+      Rules: 
+        - Name: RestrictIP
+          Priority: '0'
+          Statement: 
+            IPSetReferenceStatement:
+              Arn: !GetAtt IPSetDenyList.Arn
+          Action:
+            Block: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: 'true'
+            CloudWatchMetricsEnabled: 'true'
+            MetricName: RestrictIP
+      VisibilityConfig:
+          SampledRequestsEnabled: 'true'
+          CloudWatchMetricsEnabled: 'true'
+          MetricName: IPRestrictions
+  
+  WebACLAssociation:
+    Type: AWS::WAFv2::WebACLAssociation
+    Properties:
+      ResourceArn: !Ref ApplicationLoadBalancer 
+      WebACLArn: !GetAtt WebACL.Arn 
 
   SubdomainRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
       HostedZoneId: Z00974392C6FM2O8GYXD3
-      Name: gtcfour.tspace.uk
+      Name: gtc4.tspace.uk
       Type: A
       AliasTarget:
         DNSName: 
