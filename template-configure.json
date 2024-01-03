@@ -1,0 +1,9 @@
+{
+    "Parameters": {
+      
+      "PrivateSubnets": ["subnet-0aa547d4559cf9bf7", "subnet-0456ec2b418f19046"],
+      "PublicSubnets": ["subnet-0aa547d4559cf9bf7", "subnet-0456ec2b418f19046"]
+
+    }
+  }
+ 
