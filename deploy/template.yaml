@@ -1,0 +1,291 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: This CFN Template launches an EC2 instance, an autoscaling group,and an application load balancer. Created by Group 4
+
+Parameters:
+  InstanceAmiId:
+    Type: String
+    Description: The AMI ID to use in launching the EC2 instance.
+    Default: "ami-03a6eaae9938c858c"
+
+  VPC:
+    Type: String
+    Description: A virtual private cloud
+    Default: "vpc-00f9c4d2d7ac05ec4"
+
+  PrivateSubnets:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: The Subnets to launch the EC2 instance into. Also implies the VPC (It is deployed into private subnet(s)).
+
+  PublicSubnets:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: The Subnets to launch the Load Balancer instance into. Also implies the VPC (It is deployed into public subnet(s)).
+
+  Region:
+    Type: String
+    Description: The region to deploy the EC2 instance in.
+    Default: us-east-1
+
+  InstanceProfileArn:
+    Type: String
+    Description: The ARN of the Instance Profile to attach to the EC2 instance.
+    Default: "cil-academy-ec2-ssm-role"
+
+  SubscriptionEndpoint:
+    Type: String
+    Description: The email that will receive the email notification.
+    Default: "muyiwaladipo1@gmail.com"
+
+Resources:
+  ELBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ELB Security Group for group 4
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+  EC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: EC2 Security Group for group 4
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          SourceSecurityGroupId:
+            Fn::GetAtt:
+              - ELBSecurityGroup
+              - GroupId
+
+  EC2TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 30
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 15
+      HealthyThresholdCount: 5
+      Matcher:
+        HttpCode: "200"
+      Name: Group4EC2TargetGroup
+      Port: 80
+      Protocol: HTTP
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: "20"
+      UnhealthyThresholdCount: 3
+      VpcId: !Ref VPC
+
+  ELBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref EC2TargetGroup
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      Port: 443
+      Protocol: HTTPS
+      Certificates:
+        - CertificateArn: arn:aws:acm:us-east-1:920119599456:certificate/12bc1f4c-7b94-48b8-867f-f4310f91c845
+
+  ApplicationLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub ${AWS::StackName}-load-balancer
+      Scheme: internet-facing
+      Subnets: !Ref PublicSubnets
+      SecurityGroups:
+        - !GetAtt ELBSecurityGroup.GroupId
+
+  IPSetDenyList:
+    Type: AWS::WAFv2::IPSet
+    Properties:
+      Description: IP addresses to Deny access
+      Name: WebACLIPSet
+      Scope: REGIONAL
+      IPAddressVersion: IPV4
+      Addresses:
+        - 192.0.2.44/32
+
+  WebACL:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: IPRestrictions
+      Scope: REGIONAL
+      DefaultAction:
+        Allow: {}
+      Rules:
+        - Name: RestrictIP
+          Priority: "0"
+          Statement:
+            IPSetReferenceStatement:
+              Arn: !GetAtt IPSetDenyList.Arn
+          Action:
+            Block: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: "true"
+            CloudWatchMetricsEnabled: "true"
+            MetricName: RestrictIP
+      VisibilityConfig:
+        SampledRequestsEnabled: "true"
+        CloudWatchMetricsEnabled: "true"
+        MetricName: IPRestrictions
+
+  WebACLAssociation:
+    Type: AWS::WAFv2::WebACLAssociation
+    Properties:
+      ResourceArn: !Ref ApplicationLoadBalancer
+      WebACLArn: !GetAtt WebACL.Arn
+
+  SubdomainRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: Z00974392C6FM2O8GYXD3
+      Name: gtc4.tspace.uk
+      Type: A
+      AliasTarget:
+        DNSName:
+          Fn::GetAtt:
+            - ApplicationLoadBalancer
+            - DNSName
+        EvaluateTargetHealth: true
+        HostedZoneId:
+          Fn::GetAtt:
+            - ApplicationLoadBalancer
+            - CanonicalHostedZoneID
+
+  LaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: !Sub ${AWS::StackName}-launch-template
+      LaunchTemplateData:
+        ImageId: !Ref InstanceAmiId
+        InstanceType: t2.micro
+        SecurityGroupIds:
+          - !Ref EC2SecurityGroup
+        IamInstanceProfile:
+          Name: !Ref InstanceProfileArn
+        TagSpecifications:
+          - ResourceType: instance
+            Tags:
+              - Key: Name
+                Value: Group4-Server
+
+        UserData:
+          Fn::Base64: !Sub |
+            #!/bin/bash
+            echo "[B3C3 INFO] ###Beginning of B3C3 User Data Script"
+            echo "[B3C3 INFO] Installing Web Server"
+            yum install -y httpd 
+            systemctl start httpd 
+            systemctl enable httpd 
+            aws s3 cp s3://cil-academy-c6-cicd-bucket/webapp/ /var/www/html/
+            #echo "<h1>Hello World!</h1>" > /var/www/html/index.html
+            echo "[B3C3 INFO] Installing Java on the Instance"
+            dnf install -y java
+            echo "[B3C3 INFO] Installing ruby and wget"
+            dnf install -y ruby wget
+            echo "[B3C3 INFO] Using wget to download Code Deploy Agent Install Script"
+            wget -O /tmp/cdagent_install https://aws-codedeploy-us-east-1.s3.us-east-1.amazonaws.com/latest/install
+            echo "[B3C3 INFO] Making the Code Deploy Agent Install Script Executable"
+            chmod +x /tmp/cdagent_install
+            echo "[B3C3 INFO] Installing and Starting the Amazon Code Deploy Agent using the Install Script"
+            /tmp/cdagent_install auto
+            echo "[B3C3 INFO] Checking the status of Code Deploy Agent via systemctl"
+            systemctl status codedeploy-agent
+            echo "[B3C3 INFO] End of B3C3 User Data Script###"
+
+  AutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      LaunchTemplate:
+        LaunchTemplateId: !Ref LaunchTemplate
+        Version: !GetAtt LaunchTemplate.LatestVersionNumber
+      MaxSize: "5"
+      MinSize: "2"
+      DesiredCapacity: "2"
+      TargetGroupARNs:
+        - !Ref EC2TargetGroup
+      VPCZoneIdentifier: !Ref PrivateSubnets
+
+  lambdadynamo:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: group4lambda
+      Architectures:
+        - x86_64
+      Handler: "lambdafunction.lambda_handler"
+      Runtime: python3.12
+      Code:
+        S3Bucket: cohort6-s3bucket-muyiwa
+        S3Key: lambdafunction.zip
+      Role: "arn:aws:iam::920119599456:role/cil-academy-lambda-role"
+      Description: "This function receives data from IoT Core, processes it, and sends it to DynamoDB for storage"
+      Environment:
+        Variables:
+          SNS_TOPIC_ARN: !Ref SNSTopic
+
+  LambdaInvoke:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref lambdadynamo
+      SourceArn: !GetAtt iotrule.Arn
+      Principal: iot.amazonaws.com
+
+  iotrule:
+    Type: AWS::IoT::TopicRule
+    Properties:
+      RuleName: group4iotrule
+      TopicRulePayload:
+        Sql: "SELECT * FROM 'vaulticore/environment/ags1'"
+        Actions:
+          - Lambda:
+              FunctionArn: !GetAtt lambdadynamo.Arn
+
+  group4table:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: group4table
+      AttributeDefinitions:
+        - AttributeName: "thingid"
+          AttributeType: "S"
+        - AttributeName: "datetime"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "thingid"
+          KeyType: HASH
+        - AttributeName: "datetime"
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+
+  SNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: "group4_notify"
+      DisplayName: "VAULTICORE STATUS: ALARM NOTIFICATION"
+      Tags:
+        - Key: "CreatedBy"
+          Value: "Group4"
+
+  SNSTopicSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref SNSTopic
+      Protocol: "email"
+      Endpoint: !Ref SubscriptionEndpoint
+
+Outputs:
+  SNSTopicArn:
+    Value: !Ref SNSTopic
+# End of CFN Template
