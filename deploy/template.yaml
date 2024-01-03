@@ -30,6 +30,11 @@ Parameters:
     Description: The ARN of the Instance Profile to attach to the EC2 instance.
     Default: "cil-academy-ec2-ssm-role"
 
+  SubscriptionEndpoint:
+    Type: String
+    Description: The ARN of the Instance Profile to attach to the EC2 instance.
+    Default: "muyiwaladipo1@gmail.com"
+
 Resources:
   ELBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -277,7 +282,7 @@ Resources:
     Properties:
       TopicArn: !Ref SNSTopic
       Protocol: "email"
-      Endpoint: "muyiwaladipo1@gmail.com"
+      Endpoint: !Ref SubscriptionEndpoint
 
 Outputs:
   SNSTopicArn:
