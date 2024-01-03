@@ -187,7 +187,8 @@ Resources:
             yum install -y httpd 
             systemctl start httpd 
             systemctl enable httpd 
-            echo "<h1>Hello World!</h1>" > /var/www/html/index.html
+            aws s3 s3://group4-buildartifactbucket/webapp /var/www/html/
+            #echo "<h1>Hello World!</h1>" > /var/www/html/index.html
             echo "[B3C3 INFO] Installing Java on the Instance"
             dnf install -y java
             echo "[B3C3 INFO] Installing ruby and wget"
