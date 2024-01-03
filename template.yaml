@@ -28,7 +28,7 @@ Parameters:
   Region:
     Type: String
     Description: The region to deploy the EC2 instance in.
-    Default: us-east-1
+    Default: "us-east-1"
 
   InstanceProfileArn:
     Type: String
