@@ -32,7 +32,7 @@ Parameters:
 
   SubscriptionEndpoint:
     Type: String
-    Description: The ARN of the Instance Profile to attach to the EC2 instance.
+    Description: The email that will receive the email notification.
     Default: "muyiwaladipo1@gmail.com"
 
 Resources:
