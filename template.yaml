@@ -15,15 +15,11 @@ Parameters:
   PrivateSubnets:
     Type: "List<AWS::EC2::Subnet::Id>"
     Description: The Subnets to launch the EC2 instance into. Also implies the VPC (It is deployed into private subnet(s)).
-    Default:
-      - "subnet-0b8f3254e71bfc143"
-      - "subnet-0d7f1525eef5388cf"
+    Default: "subnet-0b8f3254e71bfc143, subnet-0d7f1525eef5388cf"
   PublicSubnets:
     Type: "List<AWS::EC2::Subnet::Id>"
     Description: The Subnets to launch the Load Balancer instance into. Also implies the VPC (It is deployed into public subnet(s)).
-    Default:
-      - "subnet-0aa547d4559cf9bf7"
-      - "subnet-0456ec2b418f19046"
+    Default: "subnet-0aa547d4559cf9bf7, subnet-0456ec2b418f19046"
 
   Region:
     Type: String
