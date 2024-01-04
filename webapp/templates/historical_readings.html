@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Historical Readings{% endblock title %}
+
+{% block content %}
+<section class="bg-light py-5">
+    <div class="container my-lg-5">
+        <div class="text-center mb-5">
+            <h5 class="text-primary mb-3">Historical Data</h5>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-10 mx-auto">
+                {% if historical_readings %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Date</th>
+                            <th scope="col">Temperature</th>
+                            <th scope="col">Humidity</th>
+                            <th scope="col">Internal Air Quality</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reading in historical_readings %}
+                        <tr>
+                            <th scope="row">{{ reading.formatted_date }}</th>
+                            <td>{{ reading.temperature.N }}</td>
+                            <td>{{ reading.humidity.N }}</td>
+                            <td>{{ reading.iaq.N }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p>No historical readings found.</p>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</section>
+{% endblock content %}
