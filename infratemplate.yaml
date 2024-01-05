@@ -41,43 +41,84 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: ELB Security Group for group 4
+      GroupName: Group4ELBSG
       VpcId: !Ref VPC
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 443
           ToPort: 443
           CidrIp: 0.0.0.0/0
-      SecurityGroupEgress:
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp: 0.0.0.0/0
-
+      Tags:
+        - Key: Name
+          Value: Group4ELBSG
+     
   EC2SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: EC2 Security Group for group 4
+      GroupName: Group4EC2SG
       VpcId: !Ref VPC
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          SourceSecurityGroupId:
-            Fn::GetAtt:
-              - ELBSecurityGroup
-              - GroupId
+      Tags:
+        - Key: Name
+          Value: Group4EC2SG
+     
+  OutboundRuleforELB:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 0
+      ToPort: 8000
+      DestinationSecurityGroupId:
+        Fn::GetAtt:
+          - EC2SecurityGroup
+          - GroupId
+      GroupId:
+        Fn::GetAtt:
+          - ELBSecurityGroup
+          - GroupId
+
+  InboundRule1forEC2:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 8000
+      ToPort: 8000
+      SourceSecurityGroupId:
+        Fn::GetAtt:
+          - ELBSecurityGroup
+          - GroupId
+      GroupId:
+        Fn::GetAtt:
+          - EC2SecurityGroup
+          - GroupId
+
+  InboundRule2forEC2:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      SourceSecurityGroupId:
+        Fn::GetAtt:
+          - ELBSecurityGroup
+          - GroupId
+      GroupId:
+        Fn::GetAtt:
+          - EC2SecurityGroup
+          - GroupId
+
 
   EC2TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      HealthCheckIntervalSeconds: 30
+      HealthCheckIntervalSeconds: 10
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 15
       HealthyThresholdCount: 5
       Matcher:
         HttpCode: "200"
       Name: Group4EC2TargetGroup
-      Port: 80
+      Port: 8000
       Protocol: HTTP
       TargetGroupAttributes:
         - Key: deregistration_delay.timeout_seconds
