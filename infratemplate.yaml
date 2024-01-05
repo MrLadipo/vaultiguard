@@ -113,7 +113,7 @@ Resources:
     Properties:
       HealthCheckIntervalSeconds: 10
       HealthCheckProtocol: HTTP
-      HealthCheckTimeoutSeconds: 15
+      HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 5
       Matcher:
         HttpCode: "200"
