@@ -1,6 +1,10 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: group4-CloudFormation deployment pipelines template
 Parameters:
+  StackName:
+    Description: Specify a stackname for the template.
+    Type: String
+    Default: group4webapp-stack
   CodeCommitRepo:
     Description: Specify the repo you want to use as source
     Type: String
@@ -83,12 +87,15 @@ Resources:
                 Provider: CloudFormation
                 Version: 1
               Configuration:
-                StackName: group4webapp-stack
-                ActionMode: CREATE_UPDATE
+                StackName: !Ref StackName
+                ActionMode: REPLACE_ON_FAILURE
                 Capabilities: CAPABILITY_IAM
                 RoleArn: arn:aws:iam::920119599456:role/cil-academy-cicd-cloudformation-role
-                TemplatePath: SourceOutput::template.yaml
+                TemplatePath: SourceOutput::infratemplate.yaml
 
               InputArtifacts:
                 - Name: SourceOutput
               RunOrder: 3
+Outputs:
+  CodePipelineArn:
+    Value: !Ref CodePipeline
