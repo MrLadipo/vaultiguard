@@ -188,7 +188,7 @@ Resources:
             yum install -y httpd 
             systemctl start httpd 
             systemctl enable httpd 
-            aws s3 cp s3://cil-academy-c6-cicd-bucket/webapp/ /var/www/html/
+            aws s3 cp --recursive s3://cil-academy-c6-cicd-bucket/webapp/ /var/www/html/
 
   AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
