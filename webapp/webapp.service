@@ -1,0 +1,12 @@
+[Unit]
+Description=Django Custom Python Web Server
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/home/ssm-user/webapp
+ExecStart=/home/ssm-user/webapp/venv/bin/python3 /home/ssm-user/webapp/manage.py runserver 0.0.0.0:8000
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

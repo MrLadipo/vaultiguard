@@ -91,7 +91,7 @@ Resources:
                 ActionMode: REPLACE_ON_FAILURE
                 Capabilities: CAPABILITY_IAM
                 RoleArn: arn:aws:iam::920119599456:role/cil-academy-cicd-cloudformation-role
-                TemplatePath: SourceOutput::infratemplate.yaml
+                TemplatePath: SourceOutput::scripts/cfn/infratemplate.yaml
 
               InputArtifacts:
                 - Name: SourceOutput
