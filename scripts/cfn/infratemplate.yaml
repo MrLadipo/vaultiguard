@@ -228,21 +228,24 @@ Resources:
             cd ~
             sudo yum update -y
             sudo yum install -y python3 python3-pip
-            sudo pip3 install --upgrade pip
-            mkdir -pv /web/django/webapp
-            aws s3 cp --recursive s3://cil-academy-c6-cicd-bucket/webapp/ /web/django/webapp
-            cd /web/django/webapp
+            sudo yum update python3-pip
+            sudo mkdir -pv /web/django/webapp
+            echo "Copying from s3 bucket"
+            sudo aws s3 cp --recursive s3://cil-academy-c6-cicd-bucket/webapp/ home/ssm-user/web/django/webapp
+            cd home/ssm-user/web/django/webapp
+            echo "Making the manage.py executable"
             sudo chmod +x manage.py
             echo "About to create virtualenv"
-            python3 -m venv venv
+            sudo python3 -m venv venv
             source ./venv/bin/activate
             pip install -r requirements.txt
             echo "About to copy systemd service unit to /etc/systemd/system"
-            cp -r g4djangowebserver.service /etc/systemd/system
-            systemctl enable webapp
-            systemctl daemon-reload
-            systemctl start webapp
-            systemctl status webapp
+            sudo cp g4djangowebserver.service /etc/systemd/system
+            echo "Enabling g4djangowebser"
+            sudo systemctl enable g4djangowebserver
+            sudo systemctl daemon-reload
+            sudo systemctl start g4djangowebserver
+            sudo systemctl status g4djangowebserver
 
   AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
