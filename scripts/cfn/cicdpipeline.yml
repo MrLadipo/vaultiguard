@@ -88,7 +88,7 @@ Resources:
                 Version: 1
               Configuration:
                 StackName: !Ref StackName
-                ActionMode: REPLACE_ON_FAILURE
+                ActionMode: CREATE_UPDATE
                 Capabilities: CAPABILITY_IAM
                 RoleArn: arn:aws:iam::920119599456:role/cil-academy-cicd-cloudformation-role
                 TemplatePath: SourceOutput::scripts/cfn/infratemplate.yaml

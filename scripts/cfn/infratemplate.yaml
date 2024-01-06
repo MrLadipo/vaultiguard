@@ -225,11 +225,18 @@ Resources:
           Fn::Base64: !Sub |
             #!/bin/bash
             echo "Beginning of Group4 User Data Script"
-            echo "Installing Web Server"
-            yum install -y httpd 
-            systemctl start httpd 
-            systemctl enable httpd 
             aws s3 cp --recursive s3://cil-academy-c6-cicd-bucket/webapp/ /var/www/html/
+            sudo yum update -y
+            sudo yum install -y python3 python3-pip
+            sudo pip3 install --upgrade pip
+            sudo pip3 install virtualenv
+            python3 -m venv venv
+            source venv/bin/activate
+            pip install -r /webapp/requirements.txt
+            aws s3 cp s3://cil-academy-c6-cicd-bucket/webapp/webapp.service /etc/systemd/system/webapp.service
+            systemctl daemon-reload
+            systemctl start webapp
+            systemctl enable webapp
 
   AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
