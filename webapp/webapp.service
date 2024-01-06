@@ -4,8 +4,8 @@ After=network.target
 
 [Service]
 User=root
-WorkingDirectory=/home/ssm-user/webapp
-ExecStart=/home/ssm-user/webapp/venv/bin/python3 /home/ssm-user/webapp/manage.py runserver 0.0.0.0:8000
+WorkingDirectory=/web/django/webapp
+ExecStart=/web/django/webapp/venv/bin/python3 /web/django/webapp/manage.py runserver 0.0.0.0:8000
 Restart=always
 
 [Install]

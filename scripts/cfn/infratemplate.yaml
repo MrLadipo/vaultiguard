@@ -66,7 +66,7 @@ Resources:
     Type: AWS::EC2::SecurityGroupEgress
     Properties:
       IpProtocol: tcp
-      FromPort: 0
+      FromPort: 8000
       ToPort: 8000
       DestinationSecurityGroupId:
         Fn::GetAtt:
@@ -151,7 +151,7 @@ Resources:
     Type: AWS::WAFv2::IPSet
     Properties:
       Description: IP addresses to Deny access
-      Name: WebACLIPSet
+      Name: Grp4WebACLIPSet
       Scope: REGIONAL
       IPAddressVersion: IPV4
       Addresses:
@@ -160,7 +160,8 @@ Resources:
   WebACL:
     Type: AWS::WAFv2::WebACL
     Properties:
-      Name: IPRestrictions
+      Description: Group 4 WAF Access Control List
+      Name: Grp4IPRestrictions
       Scope: REGIONAL
       DefaultAction:
         Allow: {}
@@ -225,17 +226,21 @@ Resources:
           Fn::Base64: !Sub |
             #!/bin/bash
             echo "Beginning of Group4 User Data Script"
-            aws s3 cp --recursive s3://cil-academy-c6-cicd-bucket/webapp/ /var/www/html/
+            mkdir -pv /web/django/webapp
+            aws s3 cp --recursive s3://cil-academy-c6-cicd-bucket/webapp/ /web/django/webapp
+            cd /web/django/webapp
+            sudo chmod +x manage.py
             sudo yum update -y
             sudo yum install -y python3 python3-pip
             sudo pip3 install --upgrade pip
             python3 -m venv venv
-            source venv/bin/activate
-            pip install -r /webapp/requirements.txt
-            aws s3 cp s3://cil-academy-c6-cicd-bucket/webapp/webapp.service /etc/systemd/system/webapp.service
+            source ./venv/bin/activate
+            pip install -r requirements.txt
+            systemctl enable webapp
             systemctl daemon-reload
             systemctl start webapp
-            systemctl enable webapp
+            systemctl status webapp
+            
 
   AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
