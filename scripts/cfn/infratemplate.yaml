@@ -5,7 +5,7 @@ Parameters:
   InstanceAmiId:
     Type: String
     Description: The AMI ID to use in launching the EC2 instance.
-    Default: "ami-03a6eaae9938c858c"
+    Default: "ami-02cd6549baea35b55"
 
   VPC:
     Type: String
@@ -226,16 +226,20 @@ Resources:
           Fn::Base64: !Sub |
             #!/bin/bash
             echo "Beginning of Group4 User Data Script"
+            cd ~
+            sudo yum update -y
+            sudo yum install -y python3 python3-pip
+            sudo pip3 install --upgrade pip
             mkdir -pv /web/django/webapp
             aws s3 cp --recursive s3://cil-academy-c6-cicd-bucket/webapp/ /web/django/webapp
             cd /web/django/webapp
             sudo chmod +x manage.py
-            sudo yum update -y
-            sudo yum install -y python3 python3-pip
-            sudo pip3 install --upgrade pip
+            echo "About to create virtualenv"
             python3 -m venv venv
             source ./venv/bin/activate
             pip install -r requirements.txt
+            echo "About to copy systemd service unit to /etc/systemd/system"
+            cp -r g4djangowebserver.service /etc/systemd/system
             systemctl enable webapp
             systemctl daemon-reload
             systemctl start webapp
@@ -326,5 +330,6 @@ Resources:
 
 Outputs:
   SNSTopicArn:
+    Description: ARN of the SNS topic
     Value: !Ref SNSTopic
 # End of CFN Template
