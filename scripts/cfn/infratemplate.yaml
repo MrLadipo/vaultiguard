@@ -5,7 +5,7 @@ Parameters:
   InstanceAmiId:
     Type: String
     Description: The AMI ID to use in launching the EC2 instance.
-    Default: "ami-02cd6549baea35b55"
+    Default: "ami-079db87dc4c10ac91"
 
   VPC:
     Type: String
@@ -51,7 +51,7 @@ Resources:
       Tags:
         - Key: Name
           Value: Group4ELBSG
-     
+
   EC2SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -61,7 +61,7 @@ Resources:
       Tags:
         - Key: Name
           Value: Group4EC2SG
-     
+
   OutboundRuleforELB:
     Type: AWS::EC2::SecurityGroupEgress
     Properties:
@@ -106,7 +106,6 @@ Resources:
         Fn::GetAtt:
           - EC2SecurityGroup
           - GroupId
-
 
   EC2TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -244,7 +243,6 @@ Resources:
             systemctl daemon-reload
             systemctl start webapp
             systemctl status webapp
-            
 
   AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -332,4 +330,8 @@ Outputs:
   SNSTopicArn:
     Description: ARN of the SNS topic
     Value: !Ref SNSTopic
+
+  WebAppUrl:
+    Description: The URL for the webapp
+    Value: https://gtc4.tspace.uk
 # End of CFN Template
