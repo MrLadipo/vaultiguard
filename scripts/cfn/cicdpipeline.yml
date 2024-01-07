@@ -63,6 +63,7 @@ Resources:
                 RepositoryName: !Ref CodeCommitRepo
                 BranchName: main
               RunOrder: 1
+
         - Name: Build
           Actions:
             - Name: Build
@@ -88,7 +89,7 @@ Resources:
                 Version: 1
               Configuration:
                 StackName: !Ref StackName
-                ActionMode: CREATE_UPDATE
+                ActionMode: REPLACE_ON_FAILURE
                 Capabilities: CAPABILITY_IAM
                 RoleArn: arn:aws:iam::920119599456:role/cil-academy-cicd-cloudformation-role
                 TemplatePath: SourceOutput::scripts/cfn/infratemplate.yaml
