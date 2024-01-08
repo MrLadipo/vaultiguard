@@ -98,7 +98,7 @@ def result(request):
     else:
         iaq_interpretation = None
 
-    if temp_interpretation == "OK" and humidity_interpretation == "OK" and iaq_interpretation == "Excellent" or iaq_interpretation == "Good":
+    if temp_badge == "success" and humidity_badge == "success" and iaq_badge == "success":
         overall_status = "OPTIMAL"
         status_badge = "success"
     elif temp_badge or humidity_badge or iaq_badge == "danger":
