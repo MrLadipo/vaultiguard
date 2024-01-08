@@ -19,6 +19,6 @@ We ensured our solution was highly available by deploying our EC2 instances and 
 
 The Reference Architecture used for this project is attached below
 
-img/GTC-Group4-Arch.png
+![Reference Architecture](https://us-east-1.console.aws.amazon.com/codesuite/codecommit/repositories/Group4_Repo/browse/refs/heads/main/--/img/GTC-Group4-Arch.png?region=us-east-1)
 
 The Web Application can be viewed here [Group 4 Webapp](https://gtc4.tspace.uk)
