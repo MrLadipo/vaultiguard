@@ -14,6 +14,32 @@ Parameters:
     Type: String
     Default: cil-academy-c6-cicd-bucket
 Resources:
+  # CloudWatchEventRule:
+  #   Type: "AWS::Events::Rule"
+  #   Properties:
+  #     Name: Group4EventTrigger
+  #     Description: "CodeCommit repository change trigger for CodePipeline"
+  #     RoleArn: arn:aws:iam::920119599456:role/service-role/Cil-Academy-EventBridge-Invoke-Event-Bus-Role
+  #     EventPattern:
+  #       source:
+  #         - aws.codecommit
+  #       detail-type:
+  #         - CodeCommit Repository State Change
+  #       resources:
+  #         - !Ref CodeCommitRepo
+  #     State: ENABLED
+  #     Targets:
+  #       - Arn:
+  #           Fn::Sub:
+  #             - "arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${PipelineName}"
+  #             - { PipelineName: !Ref CodePipeline }
+  #         Id: "PipelineTarget"
+  ArtifactBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+	      BucketName: group4-artifact-bucket
+        Description: S3 Bucket for Artifact
+
   CodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
@@ -38,7 +64,8 @@ Resources:
             build:
               commands:
                 - echo Build started on `date`                
-                - aws s3 cp webapp s3://cil-academy-c6-cicd-bucket/webapp  --recursive
+                - aws s3 cp webapp s3://group4-artifact-bucket/webapp  --recursive
+                - aws s3 cp scripts/lambdafunction.zip s3://group4-artifact-bucket/
       TimeoutInMinutes: 60
   CodePipeline:
     Type: AWS::CodePipeline::Pipeline
@@ -89,7 +116,7 @@ Resources:
                 Version: 1
               Configuration:
                 StackName: !Ref StackName
-                ActionMode: REPLACE_ON_FAILURE
+                ActionMode: CREATE_UPDATE
                 Capabilities: CAPABILITY_IAM
                 RoleArn: arn:aws:iam::920119599456:role/cil-academy-cicd-cloudformation-role
                 TemplatePath: SourceOutput::scripts/cfn/infratemplate.yaml
@@ -97,6 +124,3 @@ Resources:
               InputArtifacts:
                 - Name: SourceOutput
               RunOrder: 3
-Outputs:
-  CodePipelineArn:
-    Value: !Ref CodePipeline
