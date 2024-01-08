@@ -15,10 +15,5 @@ We ensured our solution was highly available by deploying our EC2 instances and 
 - Deploying an autoscaling group with a launch template
 - Storing the web application artefacts in Amazon S3
 
-## Reference Architecture
-
-The Reference Architecture used for this project is attached below
-
-![Reference Architecture]https://drive.google.com/file/d/1yqGgxN2kYY3zdogp2uf_Ln_LwOmZPdMU/view?usp=sharing)
 
 The Web Application can be viewed here [Group 4 Webapp](https://gtc4.tspace.uk)
