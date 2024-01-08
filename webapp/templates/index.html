@@ -1,110 +1,135 @@
-{% extends "base.html" %}
-
-{% block title %}Historical Readings{% endblock title %}
-
-{% block content %}
+{% extends "base.html" %} {% block title %}Historical Readings{% endblock title
+%} {% block content %}
 
 <section class="text-bg-primary py-xl-5 py-lg-2">
-    <div class="container my-lg-5">
-        <div class="row gx-5 align-items-center justify-content-center">
-            <div class="col-lg-7">
-                <div class="my-5">
-                    <span class="bg-white text-primary-emphasis rounded-5 px-3 py-2"><i
-                            class="fa-solid fa-medal me-1"></i> Group Technical Challenge</span>
-                    <h2 class="display-5 fw-bolder mb-3 mt-4">
-                        Lorem ipsum dolor sit amet.
-                    </h2>
-                    <p class="lead fw-normal mb-4">Lorem ipsum dolor sit amet consectetur adipisicing elit. Earum,
-                        quod possimus repudiandae, unde delectus facilis iure, nostrum quasi quisquam tenetur eaque
-                        saepe commodi porro natus!</p>
-                </div>
-            </div>
-            <div class="col-lg-5 d-lg-block d-none">
-                <img src="" class="w-100" alt="">
-            </div>
+  <div class="container my-lg-5">
+    <div class="row gx-5 align-items-center justify-content-center">
+      <div class="col-lg-7">
+        <div class="my-5">
+          <span class="bg-white text-primary-emphasis rounded-5 px-3 py-2"
+            ><i class="fa-solid fa-medal me-1"></i> Group Technical
+            Challenge</span
+          >
+          <h2 class="display-5 fw-bolder mb-3 mt-4">
+            Lorem ipsum dolor sit amet.
+          </h2>
+          <p class="lead fw-normal mb-4">
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Earum, quod
+            possimus repudiandae, unde delectus facilis iure, nostrum quasi
+            quisquam tenetur eaque saepe commodi porro natus!
+          </p>
         </div>
+      </div>
+      <div class="col-lg-5 d-lg-block d-none">
+        <img src="" class="w-100" alt="" />
+      </div>
     </div>
+  </div>
 </section>
 
 <section class="bg-light py-5">
-    <div class="container my-lg-5">
-        <div class="text-center mb-5">
-            <h5 class="text-primary mb-3">Most Recent Data</h5>
-            <h3>{{ date_strptime }}</h3>
-        </div>
-        <div class="row g-4">
-            {% if most_recent_item %}
-            <div class="col-12 col-sm-6 col-lg-4">
-                <div class="card border-0 shadow h-100">
-                    <div class="position-absolute text-start top-0 start-0 w-100 p-2">
-                        <span class="badge p-2 text-bg-{{ temp_badge }}">
-                            <i class="fa-solid fa-circle small fw-bold text-white"></i>
-                        </span>
-                    </div>
-                    <div class="card-body pb-4 pt-5 px-5 text-center">
-                        <div class="mb-4">
-                            <i class="fa-solid fa-temperature-three-quarters text-primary-emphasis fa-3x"></i>
-                        </div>
-                        <span class="fs-5 d-block mb-2" title="How Hot The Volt Is">Temperature
-                            ({{ temperature }}&deg;C)</span>
-                        <span class="badge text-bg-primary px-2 py-2">{{ temp_interpretation }}</span>
-                        {% if temp_response %}<p class="text-body-secondary mt-3 fw-bold">{{ temp_response }}</p>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-sm-6 col-lg-4">
-                <div class="card border-0 shadow h-100">
-                    <div class="position-absolute text-start top-0 start-0 w-100 p-2">
-                        <span class="badge p-2 text-bg-{{ humidity_badge }}">
-                            <i class="fa-solid fa-circle small fw-bold text-white"></i>
-                        </span>
-                    </div>
-                    <div class="card-body pb-4 pt-5 px-5 text-center">
-                        <div class="mb-4">
-                            <i class="fa-solid fa-smog text-primary-emphasis fa-3x"></i>
-                        </div>
-                        <span class="fs-5 d-block mb-2" title="Relative Humidity Within the Vault">Humidity
-                            ({{ humidity }}&percnt;)</span>
-                        <span class="badge text-bg-primary px-2 py-2">{{ humidity_interpretation }}</span>
-                        {% if humidity_response %}<p class="text-body-secondary mt-3 fw-bold">{{ humidity_response }}
-                        </p>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-sm-6 col-lg-4">
-                <div class="card border-0 shadow h-100">
-                    <div class="position-absolute text-start top-0 start-0 w-100 p-2">
-                        <span class="badge p-2 text-bg-{{ iaq_badge }}">
-                            <i class="fa-solid fa-circle small fw-bold text-white"></i>
-                        </span>
-                    </div>
-                    <div class="card-body pb-4 pt-5 px-5 text-center">
-                        <div class="mb-4">
-                            <i class="fa-solid fa-wind text-primary-emphasis fa-3x"></i>
-                        </div>
-                        <span class="fs-5 d-block mb-2" title="Air Quality Within the Vault">Internal Air Quality
-                            ({{ iaq }})</span>
-                        <span class="badge text-bg-primary px-2 py-2">{{ iaq_interpretation }}</span>
-                        {% if iaq_response %}<p class="text-body-secondary mt-3 fw-bold">{{ iaq_response }}</p>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            {% else %}
-            <p>No data found.</p>
-            {% endif %}
-        </div>
-        <div class="row mt-4">
-            <div class="d-flex justify-content-center align-items-center">
-                <button class="btn btn-{{ status_badge }} fw-bold text-white">
-                    {{ overall_status }}
-                </button>
-            </div>
-        </div>
+  <div class="container my-lg-5">
+    <div class="text-center mb-5">
+      <h5 class="text-primary mb-3">Most Recent Data</h5>
+      <h3>{{ date_strptime }}</h3>
     </div>
+    <div class="row g-4">
+      {% if most_recent_item %}
+      <div class="col-12 col-sm-6 col-lg-4">
+        <div class="card border-0 shadow h-100">
+          <div class="position-absolute text-start top-0 start-0 w-100 p-2">
+            <span class="badge p-2 text-bg-{{ temp_badge }}">
+              <i class="fa-solid fa-circle small fw-bold text-white"></i>
+            </span>
+          </div>
+          <div class="card-body pb-4 pt-5 px-5 text-center">
+            <div class="mb-4">
+              <i
+                class="fa-solid fa-temperature-three-quarters text-primary-emphasis fa-3x"
+              ></i>
+            </div>
+            <span class="fs-5 d-block mb-2" title="How Hot The Volt Is"
+              >Temperature ({{ temperature }}&deg;C)</span
+            >
+            <span class="badge text-bg-primary px-2 py-2"
+              >{{ temp_interpretation }}</span
+            >
+            {% if temp_response %}
+            <p class="text-body-secondary mt-3 fw-bold">{{ temp_response }}</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-sm-6 col-lg-4">
+        <div class="card border-0 shadow h-100">
+          <div class="position-absolute text-start top-0 start-0 w-100 p-2">
+            <span class="badge p-2 text-bg-{{ humidity_badge }}">
+              <i class="fa-solid fa-circle small fw-bold text-white"></i>
+            </span>
+          </div>
+          <div class="card-body pb-4 pt-5 px-5 text-center">
+            <div class="mb-4">
+              <i class="fa-solid fa-smog text-primary-emphasis fa-3x"></i>
+            </div>
+            <span
+              class="fs-5 d-block mb-2"
+              title="Relative Humidity Within the Vault"
+              >Humidity ({{ humidity }}&percnt;)</span
+            >
+            <span class="badge text-bg-primary px-2 py-2"
+              >{{ humidity_interpretation }}</span
+            >
+            {% if humidity_response %}
+            <p class="text-body-secondary mt-3 fw-bold">
+              {{ humidity_response }}
+            </p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-sm-6 col-lg-4">
+        <div class="card border-0 shadow h-100">
+          <div class="position-absolute text-start top-0 start-0 w-100 p-2">
+            <span class="badge p-2 text-bg-{{ iaq_badge }}">
+              <i class="fa-solid fa-circle small fw-bold text-white"></i>
+            </span>
+          </div>
+          <div class="card-body pb-4 pt-5 px-5 text-center">
+            <div class="mb-4">
+              <i class="fa-solid fa-wind text-primary-emphasis fa-3x"></i>
+            </div>
+            <span class="fs-5 d-block mb-2" title="Air Quality Within the Vault"
+              >Internal Air Quality ({{ iaq }})</span
+            >
+            <span class="badge text-bg-primary px-2 py-2"
+              >{{ iaq_interpretation }}</span
+            >
+            {% if iaq_response %}
+            <p class="text-body-secondary mt-3 fw-bold">{{ iaq_response }}</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      {% else %}
+      <p>No data found.</p>
+      {% endif %}
+    </div>
+    <div class="row mt-4">
+      <div class="d-flex justify-content-center align-items-center">
+        <button class="btn btn-{{ status_badge }} fw-bold text-white">
+          {{ overall_status }}
+        </button>
+      </div>
+    </div>
+  </div>
 </section>
+
+<script>
+  // Reload the page every two minutes (120 seconds)
+  setTimeout(function () {
+    location.reload();
+  }, 120000); // 120000 milliseconds = 2 minutes
+</script>
 
 {% endblock content %}
