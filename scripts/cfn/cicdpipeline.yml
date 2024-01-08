@@ -9,10 +9,6 @@ Parameters:
     Description: Specify the repo you want to use as source
     Type: String
     Default: Group4_Repo
-  ArtifactBucket:
-    Description: Specify the repo you want to use as source
-    Type: String
-    Default: cil-academy-c6-cicd-bucket
 Resources:
   # CloudWatchEventRule:
   #   Type: "AWS::Events::Rule"
@@ -37,9 +33,7 @@ Resources:
   ArtifactBucket:
     Type: AWS::S3::Bucket
     Properties:
-	      BucketName: group4-artifact-bucket
-        Description: S3 Bucket for Artifact
-
+      BucketName: group4-artifact-bucket
   CodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
