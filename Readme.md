@@ -19,7 +19,8 @@ We ensured our solution was highly available by deploying our EC2 instances and 
 ## Reference Architecture
 
 The Reference Architecture used for this project is attached below
-![Reference Architecture](Reference Architecture.png)
+
+[Reference Architecture](Reference Architecture.png)
 
 
 The Web Application can be viewed here [Group 4 Webapp](https://gtc4.tspace.uk)
