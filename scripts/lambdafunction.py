@@ -109,7 +109,7 @@ def lambda_handler(event, context):
         elif (
             temperature_notification == "WARN"
             or humidity_notification == "WARN"
-            and (iaq_notification == "OK" or iaq_notification == "EXCELLENT")
+            or (iaq_notification == "OK" or iaq_notification == "EXCELLENT")
         ):
             status = "WARNING"
         elif (
