@@ -224,23 +224,30 @@ Resources:
         UserData:
           Fn::Base64: !Sub |
             #!/bin/bash
-            echo "Beginning of Group4 User Data Script"
+            echo "[Group4 INFO] Beginning of Group4 User Data Script"
             cd ~
             sudo yum update -y
-            mkdir webapp
-            sudo aws s3 cp --recursive s3://group4-artifact-bucket/webapp/ ./webapp
-            cd ./webapp           
-            echo "Installing dependencies"
-            sudo yum install python3-pip -y
-            sudo pip install -r  requirements.txt
-            echo "About to copy systemd service unit to /etc/systemd/system"
-            sudo cp g4djangowebserver.service /etc/systemd/system
-            echo "Enabling g4djangowebserver"
-            sudo systemctl enable g4djangowebserver
-            sudo systemctl daemon-reload
-            sudo systemctl start g4djangowebserver
-            sudo systemctl status g4djangowebserver
-            echo "End of Group4 User Data Script"
+            sudo yum install -y python3 python3-pip
+            sudo pip3 install --upgrade pip
+            mkdir -pv /web/django/webapp
+            aws s3 cp --recursive s3://group4-artifact-bucket/webapp/ /web/django/webapp/
+            cd /web/django/webapp
+            echo "[Group4 INFO] checking we are in our webapp directory"
+            pwd && ls -lhart
+            echo "[Group4 INFO] making manage.py executable"
+            sudo chmod +x manage.py
+            echo "[Group4 INFO] About to create virtualenv"
+            python3 -m venv venv
+            echo "[Group4 INFO] checking our venv has been created"
+            pwd && ls -lhart
+            source ./venv/bin/activate
+            pip install -r requirements.txt
+            echo "[Group4 INFO] About to copy systemd service unit to /etc/systemd/system"
+            cp -r g4djangowebserver.service /etc/systemd/system/
+            systemctl enable g4djangowebserver
+            systemctl daemon-reload
+            systemctl start g4djangowebserver
+            systemctl status g4djangowebserver
 
   AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup

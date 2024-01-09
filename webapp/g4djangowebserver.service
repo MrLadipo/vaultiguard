@@ -3,9 +3,9 @@ Description=Django Custom Python Web Server
 After=network.target
 
 [Service]
-User=ssm-user
-WorkingDirectory=/home/ssm-user/webapp
-ExecStart=sudo python3 manage.py runserver 0.0.0.0:8000
+User=root
+WorkingDirectory=/web/django/webapp
+ExecStart=/web/django/webapp/venv/bin/python3 /web/django/webapp/manage.py runserver 0.0.0.0:8000
 Restart=always
 
 [Install]
