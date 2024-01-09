@@ -15,7 +15,7 @@ dynamodb_client = refresh_dynamodb_client()
 
 def result(request):
     # DynamoDB setup
-    table_name = "group4db"
+    table_name = "group4table"
     # dynamodb_client = boto3.client("dynamodb", region_name="us-east-1")
     # dynamodb_client = refresh_dynamodb_client()
 
@@ -28,7 +28,7 @@ def result(request):
             ExpressionAttributeValues={
                 ":pk_value": {"S": "vaulticore_ags_sensor_01"},
             },
-            ScanIndexForward=False  # To retrieve data in reverse order
+            ScanIndexForward=False,  # To retrieve data in reverse order
         )
 
         # Check if there are items returned
@@ -131,7 +131,7 @@ def result(request):
 
 def historical_readings(request):
     # DynamoDB setup
-    table_name = "group4db"
+    table_name = "group4table"
     dynamodb_client = boto3.client("dynamodb", region_name="us-east-1")
 
     try:
@@ -140,10 +140,8 @@ def historical_readings(request):
             TableName=table_name,
             Limit=30,
             KeyConditionExpression="thingid = :pk_value",
-            ExpressionAttributeValues={
-                ":pk_value": {"S": "vaulticore_ags_sensor_01"}
-            },
-            ScanIndexForward=False
+            ExpressionAttributeValues={":pk_value": {"S": "vaulticore_ags_sensor_01"}},
+            ScanIndexForward=False,
         )
 
         # Check if there are items returned
