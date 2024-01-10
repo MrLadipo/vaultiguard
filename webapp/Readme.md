@@ -5,9 +5,9 @@
 
 Welcome to the Vaulticore Environmental Monitoring System, a critical component in ensuring the safety and stability of Shalomium, the rare element pivotal for our transition away from fossil fuels. As the guardian of humanity's future, your role involves monitoring and responding to the environmental conditions within Vaulticore.
 
-![Screenshot](image/GTC-Group4-webApp-Screenshot.png "Screenshot of WebApp Main page")
-![Screenshot](image/GTC-Group4-WebApp-Screenshot2.png "Screenshort of recent data Section")
-![Screenshot](image/Historical-data-page-Screenshot.png "Screenshot of Historical Data Page)
+![Screenshot](./image/GTC-Group4-webApp-Screenshot.png "Screenshot of WebApp Main page")
+![Screenshot](./image/GTC-Group4-WebApp-Screenshot2.png "Screenshort of recent data Section")
+![Screenshot](./image/Historical-data-page-Screenshot.png "Screenshot of Historical Data Page")
 
 ## Prerequisites
 Before running the project, ensure that you have the following:
@@ -18,29 +18,22 @@ AWS DynamoDB credentials
 Internet connection for real-time sensor readings
 
 ## Running the Project Locally
-
 Clone the repository:
-
 First, clone the repository to your local machine:
-
 ```bash
 git clone https://git-codecommit.us-east-1.amazonaws.com/v1/repos/Group4_Repo
 cd Group4_Repo/webapp
 ```
 Install the requirements:
-
 ```bash
 pip install -r requirements.txt
 ```
 Run migrations:
-
 ```bash
 python manage.py migrate
 ```
 ## Running the Project
-
 Finally, run the development server:
-
 ```bash
 python manage.py runserver
 ```
