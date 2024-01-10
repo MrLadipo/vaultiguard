@@ -18,9 +18,14 @@ def lambda_handler(event, context):
 
     def interpret_attribute(attribute, value):
         notification_mapping = {
-            "Temperature": ["WARN", "OK", "ALARM"],
-            "Humidity": ["WARN", "OK", "ALARM"],
-            "Internal Air Quality (IAQ)": ["ALARM", "EXCELLENT", "OK", "ALARM"],
+            "Temperature": ["LOW", "OK", "HIGH"],
+            "Humidity": ["LOW", "OK", "HIGH"],
+            "Internal Air Quality (IAQ)": [
+                "POOR IAQ",
+                "EXCELLENT",
+                "OK",
+                "Very POOR IAQ",
+            ],
         }
 
         response_action_mapping = {
@@ -107,16 +112,17 @@ def lambda_handler(event, context):
         ):
             status = "OPTIMAL"
         elif (
-            (temperature_notification == "WARN" or humidity_notification == "WARN")
+            (temperature_notification == "LOW" or humidity_notification == "LOW")
             and (iaq_notification == "OK" or iaq_notification == "EXCELLENT")
-            and temperature_notification != "ALARM"
-            and humidity_notification != "ALARM"
+            and temperature_notification != "HIGH"
+            and humidity_notification != "HIGH"
         ):
             status = "WARNING"
         elif (
-            temperature_notification == "ALARM"
-            or humidity_notification == "ALARM"
-            or iaq_notification == "ALARM"
+            temperature_notification == "HIGH"
+            or humidity_notification == "HIGH"
+            or iaq_notification == "POOR IAQ"
+            or iaq_notification == "Very POOR IAQ"
         ):
             status = "ALARM"
         return status
@@ -125,18 +131,6 @@ def lambda_handler(event, context):
     print("The environmental status of your vault is: ", env_status)
     # Extract data from the parsed JSON payload
 
-    print(
-        f"Environmental Status within Vaulticore as at {formatted_date}\n\n"
-        f"Overall Environmental Status: {env_status}\n\n\n"
-        "The environmental conditions of the vault are:\n\n\n"
-        "Temperature     Humidity        IAQ\n\n"
-        f" {temperature}               {humidity}             {iaq}\n\n\n"
-        f" {temperature_notification}               {humidity_notification}             {iaq_notification}\n\n\n"
-        "The following response actions have been taken to resolve this:\n\n\n"
-        f"For Temperature: {temperature_action}\n\n\n"
-        f"For Humidity:    {humidity_action}\n\n\n"
-        f"For IAQ:         {iaq_action}"
-    )
     try:
         response = client.put_item(
             TableName="group4table",
@@ -145,24 +139,24 @@ def lambda_handler(event, context):
                 "datetime": {"S": event["datetime"]},
                 "temperature": {"N": str(event["temperature"])},
                 "humidity": {"N": str(event["humidity"])},
-                "iaq": {"N": str(event["iaq"])},
-                "t_notification": {"S": temperature_notification},
-                "t_action": {"S": temperature_action},  # Corrected variable name
-                "h_notification": {
-                    "S": humidity_notification
-                },  # Include humidity values if needed
-                "h_action": {"S": humidity_action},
-                "iaq_notification": {
-                    "S": iaq_notification
-                },  # Include IAQ values if needed
-                "iaq_action": {"S": iaq_action},
-                "status": {"S": env_status},
+                "iaq": {"N": str(event["iaq"])}
+                # "t_notification": {"S": temperature_notification},
+                # "t_action": {"S": temperature_action},  # Corrected variable name
+                # "h_notification": {
+                #     "S": humidity_notification
+                # },  # Include humidity values if needed
+                # "h_action": {"S": humidity_action},
+                # "iaq_notification": {
+                #     "S": iaq_notification
+                # },  # Include IAQ values if needed
+                # "iaq_action": {"S": iaq_action},
+                # "status": {"S": env_status},
             },
         )
         print("DynamoDB response:", response)
 
         email_message = (
-            f"Environmental Status within Vaulticore as at {formatted_date}\n\n"
+            f"Environmental Status within Vaulticore as at {formatted_date} (GMT).\n\n"
             f"Overall Environmental Status: {env_status}\n\n"
             "Environmental Conditions:\n"
             f"- Temperature: {temperature_notification} ({temperature}\u00B0C)\n"
@@ -173,6 +167,8 @@ def lambda_handler(event, context):
             f"- For Humidity: {humidity_action}\n"
             f"- For IAQ: {iaq_action}\n"
         )
+
+        print(email_message)
 
         if env_status == "ALARM":
             newresponse = sns.publish(
