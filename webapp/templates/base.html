@@ -27,6 +27,8 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarToggler">
                 <div class="d-flex mb-3 mb-lg-0 ms-lg-auto">
+                    {% block backbtn %}
+                    {% endblock backbtn %}
                     <a href="{% url 'historical_readings' %}" class="btn btn-light me-2"><i
                             class="fa-solid fa-square-poll-vertical me-1"></i>
                         Historical Data</a>

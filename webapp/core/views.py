@@ -40,7 +40,7 @@ def result(request):
             iaq = most_recent_item["iaq"]["N"]
             date_strptime = datetime.strptime(
                 item_date, "%Y-%m-%dT%H:%M:%S.%f"
-            ).strftime("%Y-%m-%d %I:%M:%S %p")
+            ).strftime("%b %d %Y %I:%M:%S %p (GMT)")
         else:
             most_recent_item = None  # No items found
     except Exception as e:
@@ -101,7 +101,7 @@ def result(request):
     if temp_badge == "success" and humidity_badge == "success" and iaq_badge == "success":
         overall_status = "OPTIMAL"
         status_badge = "success"
-    elif temp_badge or humidity_badge or iaq_badge == "danger":
+    elif temp_badge == "danger" or humidity_badge == "danger" or iaq_badge == "danger":
         overall_status = "ALARM"
         status_badge = "danger"
     else:
@@ -152,8 +152,57 @@ def historical_readings(request):
                 item_date = v["datetime"]["S"]
                 formatted_date = datetime.strptime(
                     item_date, "%Y-%m-%dT%H:%M:%S.%f"
-                ).strftime("%Y-%m-%d %I:%M:%S %p")
-                v["formatted_date"] = formatted_date  # Add formatted date to each item
+                ).strftime("%b %d %Y %I:%M:%S %p (GMT)")
+                v["formatted_date"] = formatted_date
+
+                temp_data = v["temperature"]["N"]
+                temp_reading = int(temp_data)
+                if temp_reading <= 14:
+                    temp_badge = "warning"
+                elif temp_reading >= 15 and temp_reading <= 25:
+                    temp_badge = "success"
+                elif temp_reading >= 26 and temp_reading <= 100:
+                    temp_badge = "danger"
+                else:
+                    temp_badge = None
+
+                humidity_data = v["humidity"]["N"]
+                humidity_reading = int(humidity_data)
+                if humidity_reading <= 29:
+                    humidity_badge = "warning"
+                elif humidity_reading >= 30 and humidity_reading <= 59:
+                    humidity_badge = "success"
+                elif humidity_reading >= 60 and humidity_reading <= 100:
+                    humidity_badge = "danger"
+                else:
+                    humidity_badge = None
+
+                iaq_data = v["iaq"]["N"]
+                iaq_reading = int(iaq_data)
+                if iaq_reading >= 51 and iaq_reading <=74:
+                    iaq_badge = "danger"
+                elif iaq_reading >= 0 and iaq_reading <= 50:
+                    iaq_badge = "success"
+                elif iaq_reading >= 75 and iaq_reading <= 100:
+                    iaq_badge = "danger"
+                else:
+                    iaq_badge = None
+
+                if temp_badge == "success" and humidity_badge == "success" and iaq_badge == "success":
+                    overall_status = "OPTIMAL"
+                    status_badge = "success"
+                elif temp_badge == "danger" or humidity_badge == "danger" or iaq_badge == "danger":
+                    overall_status = "ALARM"
+                    status_badge = "danger"
+                else:
+                   overall_status = "WARNING"
+                   status_badge = "warning"
+
+                v["overall_status"] = overall_status
+                v["status_badge"] = status_badge
+
+
+
         else:
             historical_readings = []  # No items found
     except Exception as e:

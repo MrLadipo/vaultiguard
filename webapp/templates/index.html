@@ -36,8 +36,12 @@
 <section class="bg-light py-5">
   <div class="container my-lg-5">
     <div class="text-center mb-5">
-      <h5 class="text-primary mb-3">Most Recent Data</h5>
-      <h3>{{ date_strptime }}</h3>
+      <h5 class="text-primary mb-3" style="font-size: 24px";>Most Recent Data</h5>
+      <h3 style="font-size: 18px;">{{ date_strptime }}</h3>
+      <div class="d-flex justify-content-center align-items-center" style="height: 80px;">
+      <div class="progress" style="width: 50%;">
+        <div id="timer-progress" class="progress-bar bg-primary" role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+      </div>
     </div>
     <div class="row g-4">
       {% if most_recent_item %}
@@ -123,6 +127,7 @@
     </div>
     <div class="row mt-4">
       <div class="d-flex justify-content-center align-items-center">
+        <p class="mt-3 me-3 fw-bold">Overall Status:</p>
         <button class="btn btn-{{ status_badge }} fw-bold text-white">
           {{ overall_status }}
         </button>
@@ -132,10 +137,27 @@
 </section>
 
 <script>
-  // Reload the page every two minutes (120 seconds)
   setTimeout(function () {
     location.reload();
-  }, 120000); // 120000 milliseconds = 2 minutes
+  }, 120000);
+
+  function updateProgressBar() {
+    const progressBar = document.getElementById('timer-progress');
+    let width = 100;
+    const durationInSeconds = 120; // 2 minutes = 120 seconds
+    const interval = setInterval(function () {
+      const timePassed = 120 - (durationInSeconds * (width / 100)); // Calculate elapsed time
+      width -= (100 / durationInSeconds); // Adjust width based on the duration
+      progressBar.style.width = width + '%';
+      if (width <= 0) {
+        clearInterval(interval);
+      }
+    }, 1000); // Update every second (1000 milliseconds)
+  }
+
+  window.onload = function () {
+    updateProgressBar();
+  };
 </script>
 
 {% endblock content %}
