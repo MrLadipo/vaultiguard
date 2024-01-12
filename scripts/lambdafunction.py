@@ -18,8 +18,8 @@ def lambda_handler(event, context):
 
     def interpret_attribute(attribute, value):
         notification_mapping = {
-            "Temperature": ["LOW", "OK", "HIGH"],
-            "Humidity": ["LOW", "OK", "HIGH"],
+            "Temperature": ["LOW Temperature", "OK", "HIGH Temperature"],
+            "Humidity": ["LOW Humidity", "OK", "HIGH Humidity"],
             "Internal Air Quality (IAQ)": [
                 "POOR IAQ",
                 "EXCELLENT",
@@ -106,25 +106,14 @@ def lambda_handler(event, context):
 
     def status_check():
         if (
-            temperature_notification == "OK"
-            and humidity_notification == "OK"
-            and (iaq_notification == "OK" or iaq_notification == "EXCELLENT")
-        ):
-            status = "OPTIMAL"
-        elif (
-            (temperature_notification == "LOW" or humidity_notification == "LOW")
-            and (iaq_notification == "OK" or iaq_notification == "EXCELLENT")
-            and temperature_notification != "HIGH"
-            and humidity_notification != "HIGH"
-        ):
-            status = "WARNING"
-        elif (
-            temperature_notification == "HIGH"
-            or humidity_notification == "HIGH"
+            temperature_notification == "HIGH Temperature"
+            or humidity_notification == "HIGH Humidity"
             or iaq_notification == "POOR IAQ"
             or iaq_notification == "Very POOR IAQ"
         ):
             status = "ALARM"
+        else:
+            status = "0"
         return status
 
     env_status = status_check()
