@@ -1,4 +1,4 @@
-# This is a repository for CIL Academy's Cohort 6 Shalomium Group Technical Challenge by Group 4
+# Shalomium Monitoring WebApp (VaultiGuard) – Group Technical Challenge (CIL Academy) 
 
 The task was divided into two parts
 
@@ -10,10 +10,15 @@ Ingest and Sample the Aggregator Sensor Readings via AWS IoT Core & Analytics Th
 
 Continuously Monitor the Aggregator Sensor Readings and provide Human Friendly interpretations on a Web Application Interface which should be made available via any standard web browser using Infrastructure as Code (IaC) tools.
 
-We ensured our solution was highly available by deploying our EC2 instances and Load balancer into two availability zones and the EC2 instances were made highly disposable by
+We ensured our solution was highly available by deploying our EC2 instances and Load balancer into two availability zones and the EC2 instances were made highly disposable by:
 
 - Deploying an autoscaling group with a launch template
 - Storing the web application artefacts in Amazon S3
 
+Key Feautures of the Web app include:
+-  Automatic updates every 120 seconds
+-  Access to historical readings
+-  Email alerts when there is an alarm trigger.
 
-The Web Application can be viewed here [Group 4 Webapp](https://gtc4.tspace.uk)
+
+
