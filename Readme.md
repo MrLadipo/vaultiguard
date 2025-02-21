@@ -1,6 +1,6 @@
-# Shalomium Monitoring WebApp (VaultiGuard) – Group Technical Challenge (CIL Academy) 
+# Shalomium Monitoring WebApp (VaultiGuard)
 
-The task was divided into two parts
+The project was divided into two parts
 
 ## Part 1
 
